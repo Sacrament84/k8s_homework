@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio-ingress
+  labels:
+    name: minio-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: minio-svc
+            port:
+              number: 9001
+      - pathType: Prefix
+        path: "/web"
+        backend:
+          service:
+            name: web-headless
+            port:
+              number: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: web-minio
+  name: web-headless
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: web-minio
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-svc
+spec:
+  selector:
+    app: minio
+  ports:
+  - port: 9001
+    targetPort: 9001
